@@ -114,29 +114,72 @@ export default function Home() {
 
   const selectedReceipt = receipts.find((r) => r.id === selectedId) ?? null;
 
+  const doneCount = receipts.filter((r) => r.status === "done").length;
+  const processingCount = receipts.filter((r) => r.status === "processing").length;
+
   return (
-    <main className="min-h-screen bg-gray-100 py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold text-center">領収書読み取り</h1>
+    <main className="min-h-screen py-8 px-4 md:py-12 md:px-6">
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <header className="mb-10 animate-fade-in-up">
+          <div className="flex items-end gap-3 mb-2">
+            <h1 className="font-serif-jp text-3xl md:text-4xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+              領収書読み取り
+            </h1>
+            <div className="w-2 h-2 rounded-full mb-2" style={{ backgroundColor: 'var(--accent)' }} />
+          </div>
+          <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
+            画像をアップロードして、日付・店舗名・金額を自動抽出
+          </p>
+        </header>
 
-        <UploadArea onFilesSelected={handleFilesSelected} />
+        {/* Upload */}
+        <section className="mb-8 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+          <UploadArea onFilesSelected={handleFilesSelected} />
+        </section>
 
+        {/* Status bar */}
         {receipts.length > 0 && (
-          <div className="space-y-4">
-            {receipts.map((receipt) => (
-              <ReceiptCard
-                key={receipt.id}
-                receipt={receipt}
-                onClick={() => setSelectedId(receipt.id)}
-                onDelete={handleDelete}
-              />
-            ))}
+          <div
+            className="flex items-center gap-4 mb-6 text-xs animate-fade-in"
+            style={{ color: 'var(--text-tertiary)' }}
+          >
+            <span>{receipts.length} 件のレシート</span>
+            {processingCount > 0 && (
+              <span style={{ color: 'var(--accent)' }}>
+                {processingCount} 件処理中...
+              </span>
+            )}
+            {doneCount > 0 && (
+              <span style={{ color: 'var(--success)' }}>
+                {doneCount} 件完了
+              </span>
+            )}
+            <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border)' }} />
           </div>
         )}
 
+        {/* Receipt cards */}
+        {receipts.length > 0 && (
+          <section className="mb-10 stagger-children">
+            <div className="grid gap-3">
+              {receipts.map((receipt) => (
+                <ReceiptCard
+                  key={receipt.id}
+                  receipt={receipt}
+                  onClick={() => setSelectedId(receipt.id)}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Results table */}
         <ResultTable receipts={receipts} />
       </div>
 
+      {/* Detail modal */}
       {selectedReceipt && (
         <ReceiptDetailModal
           receipt={selectedReceipt}
